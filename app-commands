@@ -50,6 +50,7 @@ env() {
 
 initapp() {
   env &&
+    start &&
     composer install &&
     sudo chmod -R 777 ./backend &&
     artisan key:generate &&
