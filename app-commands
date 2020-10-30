@@ -1,117 +1,131 @@
 #!/bin/bash
 
-start () {
-    sudo docker-compose up -d
+start() {
+  sudo docker-compose up -d
 }
 
-logs () {
-    sudo docker-compose logs -f "${@:1}"
+logs() {
+  sudo docker-compose logs -f "${@:1}"
 }
 
-artisan () {
-    sudo docker-compose run --rm backend php artisan "${@:1}"
+artisan() {
+  sudo docker-compose run --rm backend php artisan "${@:1}"
 }
 
-build () {
-    sudo docker-compose build "${@:1}"
+build() {
+  sudo docker-compose build "${@:1}"
 }
 
-composer () {
-    sudo docker-compose run --rm backend composer "${@:1}"
+composer() {
+  sudo docker-compose run --rm backend composer "${@:1}"
 }
 
-destroy () {
-    read -p "Isso excluirá conteiners, volumes e imagens. Você tem certeza? [y/N]: " -r
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then exit; fi
-    sudo docker-compose down -v --rmi all
+destroy() {
+  read -p "Isso excluirá conteiners, volumes e imagens. Você tem certeza? [y/N]: " -r
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then exit; fi
+  sudo docker-compose down -v --rmi all
 }
 
-down () {
-    sudo docker-compose down "${@:1}"
+down() {
+  sudo docker-compose down "${@:1}"
 }
 
-restart () {
-    stop && start
+restart() {
+  stop && start
 }
 
-stop () {
-    sudo docker-compose stop
+stop() {
+  sudo docker-compose stop
 }
 
-yarn () {
-    sudo docker-compose run --rm frontend yarn "${@:1}"
+yarn() {
+  sudo docker-compose run --rm frontend yarn "${@:1}"
 }
 
-env () {
-    if [ ! -f .env ]; then
-        sudo cp backend/.env.example backend/.env
-    fi
+env() {
+  if [ ! -f .env ]; then
+    sudo cp backend/.env.example backend/.env
+  fi
 }
 
-initapp () {
-    env \
-        && composer install \
-        && artisan key:generate \
-        && artisan migrate \
-        && yarn install 
+initapp() {
+  env &&
+    composer install &&
+    sudo chmod -R 777 ./backend &&
+    artisan key:generate &&
+    artisan migrate &&
+    yarn install
 }
 
-initdocker () {
-    down -v \
-        && build \
-        && start
+initdocker() {
+  down -v &&
+    build &&
+    start
 }
 
-update () {
-    git pull \
-        && build \
-        && composer install \
-        && artisan migrate \
-        && yarn install \
-        && start
+update() {
+  git pull &&
+    build &&
+    composer install &&
+    artisan migrate &&
+    yarn install &&
+    start
 }
 
 case "$1" in
-    artisan)
-        artisan "${@:2}";;
-    build)
-        build "${@:2}";;
-    composer)
-        composer "${@:2}";;
-    destroy)
-        destroy;;
-    down)
-        down "${@:2}";;
-    logs)
-        logs "${@:2}";;
-    restart)
-        restart;;
-    start)
-        start;;
-    stop)
-        stop;;
-    initapp) 
-        initapp;; 
-    initdocker) 
-        initdocker;; 
-    update) 
-        update;;
-    yarn)
-        yarn "${@:2}";;
-    *)
-        cat << EOF
+artisan)
+  artisan "${@:2}"
+  ;;
+build)
+  build "${@:2}"
+  ;;
+composer)
+  composer "${@:2}"
+  ;;
+destroy)
+  destroy
+  ;;
+down)
+  down "${@:2}"
+  ;;
+logs)
+  logs "${@:2}"
+  ;;
+restart)
+  restart
+  ;;
+start)
+  start
+  ;;
+stop)
+  stop
+  ;;
+initapp)
+  initapp
+  ;;
+initdocker)
+  initdocker
+  ;;
+update)
+  update
+  ;;
+yarn)
+  yarn "${@:2}"
+  ;;
+*)
+  cat <<EOF
 
 Comandos para demonstração do ambiente de desenvolvimento com Docker.
 
-Uso:
+Como usar:
     app <command> [options] [arguments]
 
-Available commands:
+Comandos Disponíveis:
     artisan ................................... Executa um comando Artisan
     composer .................................. Executa um comando Composer
     yarn ...................................... Executa um comando Yarn
     initdocker ................................ Inicializa o ambiente Docker
-    initapp ................................... Inicializa a aplicação
+    initapp ................................... Inicializa a aplicação (backend e frontend)
     build [image] ............................. Constrói todas as imagens ou uma específica
     destroy ................................... Remove todo o ambiente Docker
     down [-v] ................................. Para e destrói todos os conteiners. Comando -v destrói os volumes
@@ -122,5 +136,6 @@ Available commands:
     logs [container] .......................... Exibe e rastrea os logs de todos os conteiners ou um específico
 
 EOF
-    exit;;
+  exit
+  ;;
 esac
