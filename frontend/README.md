@@ -1,4 +1,4 @@
-# tmp
+# Frontend Accordous
 
 ## Project setup
 ```
